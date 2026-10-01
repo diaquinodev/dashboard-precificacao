@@ -1,10 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  decodeText,
+  mergeProducts,
   normalizeHeader,
   parseCsv,
   parseNumber,
   readCatalog,
+  sheetsCsvUrl,
   toCsv,
 } from "../src/engine/catalog.js";
 
@@ -105,4 +108,44 @@ test("o catálogo de exemplo carrega sem problemas", async () => {
   const { products, issues } = readCatalog(text);
   assert.equal(issues.length, 0);
   assert.ok(products.length >= 10);
+});
+
+test("sheetsCsvUrl: link de edição, publicado e inválido", () => {
+  assert.equal(
+    sheetsCsvUrl("https://docs.google.com/spreadsheets/d/AbC-123_x/edit#gid=42"),
+    "https://docs.google.com/spreadsheets/d/AbC-123_x/export?format=csv&gid=42",
+  );
+  assert.equal(
+    sheetsCsvUrl("https://docs.google.com/spreadsheets/d/AbC/edit?usp=sharing"),
+    "https://docs.google.com/spreadsheets/d/AbC/export?format=csv&gid=0",
+  );
+  const published =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-x/pub?gid=0&single=true&output=csv";
+  assert.equal(sheetsCsvUrl(published), published);
+  assert.equal(sheetsCsvUrl("https://exemplo.com/planilha.csv"), null);
+});
+
+test("mergeProducts: atualiza pelo SKU sem diferenciar maiúsculas e acrescenta os novos", () => {
+  const current = [
+    { sku: "A1", name: "Blusa", unitCost: 10 },
+    { sku: "MAN-001", name: "Manual", unitCost: 5 },
+  ];
+  const { products, added, updated } = mergeProducts(current, [
+    { sku: "a1", name: "Blusa nova", unitCost: 12 },
+    { sku: "B2", name: "Saia", unitCost: 20 },
+  ]);
+  assert.equal(added, 1);
+  assert.equal(updated, 1);
+  assert.deepEqual(
+    products.map((p) => `${p.sku}:${p.unitCost}`),
+    ["a1:12", "MAN-001:5", "B2:20"],
+  );
+  assert.equal(current[0].unitCost, 10, "não altera o catálogo original");
+});
+
+test("decodeText: UTF-8 e Windows-1252 (CSV do Excel)", () => {
+  assert.equal(decodeText(new TextEncoder().encode("Calça;29,90")), "Calça;29,90");
+  // "Calça" em Windows-1252: ç = 0xE7
+  const cp1252 = new Uint8Array([0x43, 0x61, 0x6c, 0xe7, 0x61]);
+  assert.equal(decodeText(cp1252), "Calça");
 });

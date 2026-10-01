@@ -208,3 +208,59 @@ export function toCsv(products) {
   );
   return ["sku;nome;custo", ...lines].join("\n") + "\n";
 }
+
+/**
+ * Converte o link de uma planilha do Google Sheets no link de exportação CSV.
+ * Aceita o link de edição (com `#gid=`), o de "Publicar na Web" (`output=csv`) e o próprio
+ * link de exportação. A planilha precisa estar compartilhada como "qualquer pessoa com o link".
+ * @param {string} url
+ * @returns {string | null} `null` se não for um link de planilha reconhecível.
+ */
+export function sheetsCsvUrl(url) {
+  const trimmed = url.trim();
+  if (!/^https:\/\/docs\.google\.com\/spreadsheets\//.test(trimmed)) return null;
+  if (/[?&](output|format)=csv/.test(trimmed)) return trimmed;
+  const id = trimmed.match(/\/spreadsheets\/d\/([\w-]+)/)?.[1];
+  if (!id) return null;
+  const gid = trimmed.match(/[#?&]gid=(\d+)/)?.[1] ?? "0";
+  return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`;
+}
+
+/**
+ * Junta um catálogo importado ao atual pelo SKU (sem diferenciar maiúsculas):
+ * SKU que já existe é atualizado, SKU novo é acrescentado, o resto fica como estava.
+ * @param {Product[]} current
+ * @param {Product[]} incoming
+ * @returns {{ products: Product[], added: number, updated: number }}
+ */
+export function mergeProducts(current, incoming) {
+  const products = current.map((p) => ({ ...p }));
+  const index = new Map(products.map((p, i) => [p.sku.toLowerCase(), i]));
+  let added = 0;
+  let updated = 0;
+  for (const p of incoming) {
+    const i = index.get(p.sku.toLowerCase());
+    if (i === undefined) {
+      index.set(p.sku.toLowerCase(), products.length);
+      products.push({ ...p });
+      added++;
+    } else {
+      products[i] = { ...p };
+      updated++;
+    }
+  }
+  return { products, added, updated };
+}
+
+/**
+ * Decodifica o arquivo enviado: UTF-8 quando válido; senão Windows-1252, que é o padrão
+ * do Excel em português ao salvar "CSV (separado por vírgulas)".
+ * @param {ArrayBuffer | Uint8Array} bytes
+ */
+export function decodeText(bytes) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder("windows-1252").decode(bytes);
+  }
+}
