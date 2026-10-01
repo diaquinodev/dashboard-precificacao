@@ -14,7 +14,7 @@ export default [
   },
   {
     // page.evaluate roda dentro do navegador
-    files: ["e2e/**/*.js"],
+    files: ["e2e/**/*.js", "scripts/screenshots.js"],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {
