@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Precificador de Marketplaces</title>
+    <meta
+      name="description"
+      content="Calcule o preço de venda certo na Shopee, Mercado Livre, TikTok Shop e Shein sem perder o seu custo."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'%3ER$%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+    <script>
+      // Aplica o tema salvo antes da primeira pintura, para não piscar.
+      try {
+        const theme = JSON.parse(localStorage.getItem("precificador:theme") ?? "null");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch {
+        /* armazenamento indisponível: segue o tema do sistema */
+      }
+    </script>
+    <script type="module" src="src/ui/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#resultados">Pular para os resultados</a>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">R$</span>
+        <div>
+          <h1 class="brand-title">Precificador de Marketplaces</h1>
+          <p class="brand-sub">
+            Shopee · Mercado Livre · TikTok Shop · Shein — taxas vigentes em
+            <span id="rates-date">—</span>
+          </p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-ghost" id="copy-all" disabled>
+          <span class="copy-long">Copiar preços</span><span class="copy-short">Copiar</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-icon"
+          id="theme-toggle"
+          aria-label="Alternar tema claro/escuro"
+        >
+          <span aria-hidden="true">◐</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Produto e configurações">
+        <!-- CATÁLOGO -->
+        <section class="card" aria-labelledby="catalog-title">
+          <div class="card-head">
+            <h2 id="catalog-title">Produto</h2>
+            <span class="pill" id="catalog-count">0 no catálogo</span>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Como escolher o produto">
+            <button
+              type="button"
+              role="tab"
+              id="tab-search"
+              aria-controls="panel-search"
+              aria-selected="true"
+            >
+              Buscar
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-add"
+              aria-controls="panel-add"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              Cadastrar
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-import"
+              aria-controls="panel-import"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              Planilha
+            </button>
+          </div>
+
+          <div class="tab-panel" role="tabpanel" id="panel-search" aria-labelledby="tab-search">
+            <label class="field">
+              <span class="field-label">SKU ou nome</span>
+              <input
+                type="search"
+                id="search"
+                placeholder="Ex.: EX-007 ou calça"
+                autocomplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="search-results"
+              />
+            </label>
+            <ul
+              class="search-results"
+              id="search-results"
+              role="listbox"
+              aria-label="Produtos encontrados"
+              hidden
+            ></ul>
+            <p class="hint" id="search-empty">
+              Catálogo vazio. Cadastre um produto, carregue uma planilha ou
+              <button type="button" class="link" id="load-example">use o catálogo de exemplo</button
+              >.
+            </p>
+          </div>
+
+          <div class="tab-panel" role="tabpanel" id="panel-add" aria-labelledby="tab-add" hidden>
+            <form id="add-form" class="stack" novalidate>
+              <label class="field">
+                <span class="field-label">Nome do produto</span>
+                <input type="text" id="add-name" required autocomplete="off" />
+              </label>
+              <div class="row-2">
+                <label class="field">
+                  <span class="field-label">SKU <small>(opcional)</small></span>
+                  <input type="text" id="add-sku" autocomplete="off" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Custo unitário (R$)</span>
+                  <input
+                    type="text"
+                    id="add-cost"
+                    inputmode="decimal"
+                    required
+                    autocomplete="off"
+                    placeholder="0,00"
+                  />
+                </label>
+              </div>
+              <p class="field-error" id="add-error" role="alert" hidden></p>
+              <button type="submit" class="btn btn-primary">Adicionar e calcular</button>
+            </form>
+          </div>
+
+          <div
+            class="tab-panel"
+            role="tabpanel"
+            id="panel-import"
+            aria-labelledby="tab-import"
+            hidden
+          >
+            <div class="stack">
+              <label class="dropzone" id="dropzone">
+                <input type="file" id="file-input" accept=".csv,.txt,text/csv" />
+                <span class="dropzone-title">Escolher arquivo CSV</span>
+                <span class="hint"
+                  >ou arraste aqui · colunas <code>sku</code>, <code>nome</code>,
+                  <code>custo</code></span
+                >
+              </label>
+              <form id="sheets-form" class="stack" novalidate>
+                <label class="field">
+                  <span class="field-label">Ou link do Google Sheets</span>
+                  <input
+                    type="url"
+                    id="sheets-url"
+                    placeholder="https://docs.google.com/spreadsheets/d/…"
+                  />
+                </label>
+                <button type="submit" class="btn btn-ghost">Carregar do link</button>
+              </form>
+              <p class="hint">
+                <a href="data/catalogo-exemplo.csv" download="modelo-catalogo.csv"
+                  >Baixar planilha modelo</a
+                >
+                ·
+                <a
+                  href="https://github.com/diaquinodev/dashboard-precificacao/blob/main/docs/planilha.md"
+                  target="_blank"
+                  rel="noopener"
+                  >Como montar a planilha</a
+                >
+              </p>
+              <div class="import-report" id="import-report" role="status" aria-live="polite"></div>
+              <div class="catalog-tools">
+                <button type="button" class="btn btn-ghost btn-sm" id="export-catalog" disabled>
+                  Exportar catálogo
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-danger"
+                  id="clear-catalog"
+                  disabled
+                >
+                  Limpar catálogo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="selected" id="selected" hidden>
+            <div class="selected-head">
+              <div>
+                <span class="sku" id="sel-sku"></span>
+                <p class="selected-name" id="sel-name"></p>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="clear-selection">
+                Trocar
+              </button>
+            </div>
+            <dl class="cost-grid">
+              <div>
+                <dt>Custo unitário</dt>
+                <dd>
+                  <input
+                    type="text"
+                    id="sel-cost"
+                    inputmode="decimal"
+                    aria-label="Custo unitário em reais"
+                  />
+                </dd>
+              </div>
+              <div>
+                <dt>
+                  Valor Base
+                  <span
+                    class="info"
+                    title="Custo + markup, vezes as unidades do kit. É o que precisa voltar para o caixa."
+                    >ⓘ</span
+                  >
+                </dt>
+                <dd class="money" id="sel-base">—</dd>
+              </div>
+            </dl>
+            <fieldset class="kit">
+              <legend>Unidades no pedido (kit)</legend>
+              <div class="segmented" id="kit-buttons"></div>
+              <p class="hint">Taxas fixas são cobradas uma vez por pedido, não por peça.</p>
+            </fieldset>
+          </div>
+        </section>
+
+        <!-- ESTRATÉGIA -->
+        <section class="card" aria-labelledby="strategy-title">
+          <div class="card-head"><h2 id="strategy-title">Estratégia</h2></div>
+          <div class="slider-field">
+            <div class="slider-head">
+              <label for="markup">Markup do Valor Base</label>
+              <output id="markup-out" for="markup"></output>
+            </div>
+            <input type="range" id="markup" min="0" max="300" step="5" />
+            <p class="hint">Quanto acima do custo você quer receber de volta, sempre.</p>
+          </div>
+          <div class="slider-field">
+            <div class="slider-head">
+              <label for="margin">Margem extra</label>
+              <output id="margin-out" for="margin"></output>
+            </div>
+            <input type="range" id="margin" min="0" max="60" step="1" />
+            <p class="hint">
+              0% = o preço só repassa taxas e imposto; o Valor Base fica protegido.
+            </p>
+          </div>
+          <div class="slider-field">
+            <div class="slider-head">
+              <label for="discount">Simular desconto na vitrine</label>
+              <output id="discount-out" for="discount"></output>
+            </div>
+            <input type="range" id="discount" min="0" max="60" step="1" />
+          </div>
+        </section>
+
+        <!-- TAXAS -->
+        <details class="card rates" id="rates-panel">
+          <summary class="card-head">
+            <h2>Taxas e imposto</h2>
+            <span class="pill" id="rates-changed" hidden>editado</span>
+          </summary>
+          <p class="hint">
+            Valores padrão vêm de fontes públicas. Confira no painel de vendedor da sua conta: taxas
+            mudam por categoria e ao longo do ano.
+          </p>
+          <div id="rates-form" class="rates-form"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="rates-reset">
+            Restaurar padrão
+          </button>
+        </details>
+      </aside>
+
+      <main id="resultados" class="results" tabindex="-1">
+        <div class="alert" id="alert" role="status" aria-live="polite">
+          <span class="alert-icon" aria-hidden="true">ℹ</span>
+          <span id="alert-text">Escolha ou cadastre um produto para ver os preços.</span>
+        </div>
+
+        <section class="insights" id="insights" aria-label="Resumo" hidden>
+          <div class="tile">
+            <span class="tile-label" id="ins-best-label">Mais lucrativo</span>
+            <span class="tile-value" id="ins-best">—</span>
+            <span class="tile-sub" id="ins-best-sub"></span>
+          </div>
+          <div class="tile">
+            <span class="tile-label">Mais barato para o cliente</span>
+            <span class="tile-value" id="ins-cheapest">—</span>
+            <span class="tile-sub" id="ins-cheapest-sub"></span>
+          </div>
+          <div class="tile">
+            <span class="tile-label">Diferença de preço entre canais</span>
+            <span class="tile-value money" id="ins-spread">—</span>
+            <span class="tile-sub">do mais barato ao mais caro</span>
+          </div>
+          <div class="tile">
+            <span class="tile-label">Desconto seguro em todos</span>
+            <span class="tile-value money" id="ins-discount">—</span>
+            <span class="tile-sub">sem prejuízo em nenhum canal</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="channels-title" id="channels-section" hidden>
+          <div class="section-head">
+            <h2 id="channels-title">Preço por canal</h2>
+            <ul class="legend" aria-label="Legenda da composição do preço">
+              <li><span class="swatch s-base"></span>Valor Base</li>
+              <li><span class="swatch s-fees"></span>Taxas da plataforma</li>
+              <li><span class="swatch s-tax"></span>Imposto</li>
+              <li><span class="swatch s-profit"></span>Lucro extra</li>
+            </ul>
+          </div>
+          <div class="channels" id="channels"></div>
+        </section>
+
+        <section class="card table-card" aria-labelledby="table-title" id="table-section" hidden>
+          <div class="card-head"><h2 id="table-title">Comparativo de repasse</h2></div>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th scope="col">Canal</th>
+                  <th scope="col">Cliente paga</th>
+                  <th scope="col">Taxas</th>
+                  <th scope="col">Imposto</th>
+                  <th scope="col">Volta pro caixa</th>
+                  <th scope="col">Lucro extra</th>
+                  <th scope="col">Margem</th>
+                </tr>
+              </thead>
+              <tbody id="compare-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <footer class="footer">
+      Projeto de portfólio · dados de exemplo fictícios ·
+      <a href="https://github.com/diaquinodev/dashboard-precificacao" target="_blank" rel="noopener"
+        >código no GitHub</a
+      >
+    </footer>
+  </body>
+</html>

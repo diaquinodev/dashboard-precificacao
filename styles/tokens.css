@@ -1,0 +1,128 @@
+/*
+ * Design tokens: toda cor, espaço, raio e sombra do app sai daqui.
+ * Componentes usam só papéis (--surface, --text-2…), nunca hex direto, então o tema escuro
+ * troca tudo em um lugar. Cores da barra de composição validadas com o validador de paleta
+ * (contraste, daltonismo e separação entre vizinhos) nos dois temas.
+ */
+:root {
+  color-scheme: light;
+
+  /* Espaço: escala de 4px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Raio */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Tipografia */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+
+  /* Movimento */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+
+  /* Superfícies e texto */
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #f0f3f7;
+  --border: #dde3ea;
+  --border-strong: #c3ccd8;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-muted: #5f6b7d;
+  --accent: #2557d6;
+  --accent-hover: #1d47b3;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6edfc;
+  --focus: #2557d6;
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 6%);
+  --shadow-md: 0 6px 24px rgb(15 23 42 / 8%);
+
+  /* Status: sempre com ícone + texto, nunca só a cor */
+  --good: #0a7d0a;
+  --good-soft: #e5f4e5;
+  --warning: #8a5a00;
+  --warning-soft: #fdf3dc;
+  --critical: #c22f2f;
+  --critical-soft: #fbe7e7;
+
+  /* Composição do preço (ordem fixa na barra) */
+  --series-base: #2a78d6;
+  --series-fees: #eb6834;
+  --series-tax: #4a3aa7;
+  --series-profit: #1baf7a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --surface: #161b24;
+    --surface-2: #1d2430;
+    --border: #2a3342;
+    --border-strong: #3a4558;
+    --text: #e8edf5;
+    --text-2: #b6c0cf;
+    --text-muted: #8e9aac;
+    --accent: #6c97f5;
+    --accent-hover: #8aacf7;
+    --accent-ink: #0d1117;
+    --accent-soft: #1d2a45;
+    --focus: #8aacf7;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 8px 28px rgb(0 0 0 / 35%);
+    --good: #4cc44c;
+    --good-soft: #15291a;
+    --warning: #f0b43c;
+    --warning-soft: #2e2512;
+    --critical: #f07171;
+    --critical-soft: #331a1c;
+    --series-base: #3987e5;
+    --series-fees: #d95926;
+    --series-tax: #9085e9;
+    --series-profit: #199e70;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1117;
+  --surface: #161b24;
+  --surface-2: #1d2430;
+  --border: #2a3342;
+  --border-strong: #3a4558;
+  --text: #e8edf5;
+  --text-2: #b6c0cf;
+  --text-muted: #8e9aac;
+  --accent: #6c97f5;
+  --accent-hover: #8aacf7;
+  --accent-ink: #0d1117;
+  --accent-soft: #1d2a45;
+  --focus: #8aacf7;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 8px 28px rgb(0 0 0 / 35%);
+  --good: #4cc44c;
+  --good-soft: #15291a;
+  --warning: #f0b43c;
+  --warning-soft: #2e2512;
+  --critical: #f07171;
+  --critical-soft: #331a1c;
+  --series-base: #3987e5;
+  --series-fees: #d95926;
+  --series-tax: #9085e9;
+  --series-profit: #199e70;
+}
