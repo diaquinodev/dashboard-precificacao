@@ -58,14 +58,14 @@ exemplo acima passo a passo, em [arquitetura](docs/arquitetura.md).
 
 ## Engenharia
 
-|                    |                                                                                                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Motor puro**     | `src/engine/` não toca no DOM: funções de entrada e saída, testadas em Node.                                                                                    |
-| **Testes**         | 32 testes de unidade, com varredura de custos de R$ 1 a R$ 500 em todos os canais, e 13 fluxos de ponta a ponta num navegador real ([`e2e/`](e2e/app.test.js)). |
-| **Tipos**          | JavaScript com JSDoc checado pelo TypeScript em modo `strict`, sem etapa de build.                                                                              |
-| **CI**             | GitHub Actions roda lint (ESLint), formatação (Prettier), tipos e testes em todo PR.                                                                            |
-| **Acessibilidade** | Rótulos em todos os campos, avisos lidos por leitor de tela, status com ícone + texto (nunca só cor), paleta validada para daltonismo nos dois temas.           |
-| **Privacidade**    | Catálogo e custos ficam só no navegador; dados vindos da planilha nunca são inseridos como HTML.                                                                |
+|                    |                                                                                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Motor puro**     | `src/engine/` não toca no DOM: funções de entrada e saída, testadas em Node.                                                                                          |
+| **Testes**         | 32 testes de unidade, com varredura de custos de R$ 1 a R$ 500 em todos os canais, e 13 fluxos de ponta a ponta num navegador real ([`e2e/`](e2e/app.test.js)).       |
+| **Tipos**          | JavaScript com JSDoc checado pelo TypeScript em modo `strict`, sem etapa de build.                                                                                    |
+| **CI**             | GitHub Actions roda lint (ESLint), formatação (Prettier), tipos, testes de unidade e os 13 fluxos de ponta a ponta no Chrome em todo PR, guardando os prints da tela. |
+| **Acessibilidade** | Rótulos em todos os campos, avisos lidos por leitor de tela, status com ícone + texto (nunca só cor), paleta validada para daltonismo nos dois temas.                 |
+| **Privacidade**    | Catálogo e custos ficam só no navegador; dados vindos da planilha nunca são inseridos como HTML.                                                                      |
 
 ### Bugs da versão original, agora cobertos por teste
 

@@ -92,4 +92,4 @@ em **nenhum** preço entre o de vitrine e o com desconto máximo.
 | `test/pricing.test.js`     | CI + local | Varredura de custo R$ 1 a 500 em todos os canais: margem atingida, preço mínimo, nunca prejuízo com margem 0%, desconto seguro. |
 | `test/catalog.test.js`     | CI + local | Números BR/US, CSV com aspas e BOM, codificação, mescla, link do Sheets.                                                        |
 | `test/rate-fields.test.js` | CI + local | Todo campo do formulário aponta para uma taxa real, e toda taxa tem campo.                                                      |
-| `e2e/app.test.js`          | local      | 13 fluxos no navegador real, incluindo responsividade em 360/768/1280 px.                                                       |
+| `e2e/app.test.js`          | CI + local | 13 fluxos no navegador real, incluindo responsividade em 360/768/1280 px.                                                       |

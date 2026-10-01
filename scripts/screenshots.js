@@ -3,6 +3,7 @@
  * Uso: `npm run screenshots`.
  */
 import { mkdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { startServer } from "./serve.js";
 
@@ -33,7 +34,7 @@ for (const [name, width, height, theme, fullPage] of shots) {
   await page.locator("#margin").fill("15");
   await page.waitForTimeout(2500); // espera o aviso "produtos carregados" sumir
   await page.screenshot({
-    path: decodeURIComponent(new URL(`${name}.png`, OUT).pathname).replace(/^\/([A-Za-z]:)/, "$1"),
+    path: fileURLToPath(new URL(`${name}.png`, OUT)),
     fullPage,
   });
   await page.close();

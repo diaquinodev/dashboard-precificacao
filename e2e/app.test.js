@@ -6,6 +6,7 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { startServer } from "../scripts/serve.js";
 import { CHANNELS } from "../src/engine/channels.js";
@@ -291,7 +292,7 @@ test("responsivo: sem rolagem horizontal da página em 360, 768 e 1280 px", asyn
       );
       assert.ok(overflow <= 0, `${width}px ${theme}: página rola ${overflow}px na horizontal`);
       await page.screenshot({
-        path: new URL(`${width}-${theme}.png`, SHOTS).pathname.slice(1),
+        path: fileURLToPath(new URL(`${width}-${theme}.png`, SHOTS)),
         fullPage: true,
       });
       assert.deepEqual(errors, []);
