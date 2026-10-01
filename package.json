@@ -1,0 +1,29 @@
+{
+  "name": "dashboard-precificacao",
+  "version": "1.0.0",
+  "description": "Dashboard de precificação para marketplaces brasileiros (Shopee, Mercado Livre, TikTok Shop, Shein).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.js\"",
+    "e2e": "node --test \"e2e/**/*.test.js\"",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.0",
+    "eslint": "^10.11.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "typescript": "5.9"
+  }
+}
