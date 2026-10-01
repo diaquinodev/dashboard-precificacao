@@ -7,6 +7,7 @@ on:
 
 jobs:
   check:
+    name: lint, tipos e testes de unidade
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,3 +17,26 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+
+  e2e:
+    name: ponta a ponta (Chrome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # O runner do GitHub já traz o Google Chrome; o teste usa o navegador instalado.
+      - run: npm run e2e
+        env:
+          BROWSER_CHANNEL: chrome
+      - name: Prints da tela (para inspecionar falhas)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: e2e/screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
